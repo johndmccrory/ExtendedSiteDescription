@@ -53,7 +53,7 @@ $inputFilter->add([
 ]);
 
 $inputFilter->add([
-    'name' => 'extended_site_description_linear',
+    'name' => 'extended_site_description_featured',
     'required' => false,
 ]);
 
@@ -97,16 +97,16 @@ $inputFilter->add([
         
         $form->add([
             'type' => 'checkbox',
-            'name' => 'extended_site_description_linear',
+            'name' => 'extended_site_description_featured',
             'options' => [
-                'label' => 'Linear', // @translate
+                'label' => 'Featured', // @translate
                 'use_hidden_element' => true,
                 'checked_value' => '1',
                 'unchecked_value' => '0',
             ],
             'attributes' => [
-                'id' => 'extended_site_description_linear',
-                'checked' => (bool) $siteSettings->get('extended_site_description_linear'),
+                'id' => 'extended_site_description_featured',
+                'checked' => (bool) $siteSettings->get('extended_site_description_featured'),
             ],
         ]);
         
@@ -141,7 +141,7 @@ $inputFilter->add([
         $siteSettings->setTargetId($siteId);
 
         $jsonLd = $event->getParam('jsonLd');
-        $jsonLd['extended_site_description_linear'] = (bool) $siteSettings->get('extended_site_description_linear');
+        $jsonLd['extended_site_description_featured'] = (bool) $siteSettings->get('extended_site_description_featured');
         $jsonLd['extended_site_description_categories'] = $siteSettings->get('extended_site_description_categories', []);
     }
 }
