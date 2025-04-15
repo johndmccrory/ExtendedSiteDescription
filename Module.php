@@ -57,10 +57,6 @@ $inputFilter->add([
     'required' => false,
 ]);
 
-$inputFilter->add([
-    'name' => 'extended_site_description_image',
-    'required' => false,
-]);
 }
 
     public function getConfigForm(PhpRenderer $renderer)
@@ -98,17 +94,6 @@ $inputFilter->add([
         $siteSettings = $form->getSiteSettings();
         $settings = $this->getServiceLocator()->get('Omeka\Settings');
         $categories = $settings->get('extended_site_description_categories', []);
-        $form->add([
-            'type' => \Omeka\Form\Element\Asset::class,
-            'name' => 'extended_site_description_image',
-            'options' => [
-                'label' => 'Image', // @translate
-            ],
-            'attributes' => [
-                'id' => 'extended_site_description_image',
-                'value' => $siteSettings->get('extended_site_description_image'),
-            ],
-        ]);
         
         $form->add([
             'type' => 'checkbox',
@@ -158,19 +143,5 @@ $inputFilter->add([
         $jsonLd = $event->getParam('jsonLd');
         $jsonLd['extended_site_description_linear'] = (bool) $siteSettings->get('extended_site_description_linear');
         $jsonLd['extended_site_description_categories'] = $siteSettings->get('extended_site_description_categories', []);
-
-        $image = null;
-        $imageId = $siteSettings->get('extended_site_description_image');
-
-        error_log(print_r($siteSettings->get('extended_site_description_categories'), true));
-
-        if ($imageId) {
-            try {
-                $response = $api->read('assets', $imageId);
-                $image = $response->getContent();
-            } catch (\Omeka\Api\Exception\NotFoundException $e) {}
-        }
-        $jsonLd['extended_site_description_image'] = $image;
-        $event->setParam('jsonLd', $jsonLd);
     }
 }
