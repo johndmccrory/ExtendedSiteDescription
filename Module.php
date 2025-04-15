@@ -11,6 +11,7 @@ use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\View\Renderer\PhpRenderer;
 
 class Module extends AbstractModule
+
 {
     public function uninstall(ServiceLocatorInterface $serviceLocator)
     {
@@ -31,7 +32,36 @@ class Module extends AbstractModule
             'rep.resource.json',
             [$this, 'addSettingsToApi']
         );
+        $sharedEventManager->attach(
+            'Omeka\Form\SiteSettingsForm',
+            'form.add_input_filters',
+            [$this, 'filterSiteSettingsForm']
+        );
     }
+
+    public function filterSiteSettingsForm(Event $event)
+{
+    $inputFilter = $event->getParam('inputFilter');
+
+$inputFilter->add([
+    'name' => 'extended_site_description_categories',
+    'required' => false,
+    'filters' => [
+        ['name' => \Laminas\Filter\StripTags::class],
+        ['name' => \Laminas\Filter\StringTrim::class],
+    ],
+]);
+
+$inputFilter->add([
+    'name' => 'extended_site_description_linear',
+    'required' => false,
+]);
+
+$inputFilter->add([
+    'name' => 'extended_site_description_image',
+    'required' => false,
+]);
+}
 
     public function getConfigForm(PhpRenderer $renderer)
     {
@@ -69,15 +99,7 @@ class Module extends AbstractModule
         $settings = $this->getServiceLocator()->get('Omeka\Settings');
         $categories = $settings->get('extended_site_description_categories', []);
         $form->add([
-            'type' => 'fieldset',
-            'name' => 'extended_site_description',
-            'options' => [
-                'label' => 'Extended Site Description', // @translate
-            ],
-        ]);
-        $fieldset = $form->get('extended_site_description');
-        $fieldset->add([
-            'type' => Asset::class,
+            'type' => \Omeka\Form\Element\Asset::class,
             'name' => 'extended_site_description_image',
             'options' => [
                 'label' => 'Image', // @translate
@@ -87,19 +109,24 @@ class Module extends AbstractModule
                 'value' => $siteSettings->get('extended_site_description_image'),
             ],
         ]);
-        $fieldset->add([
+        
+        $form->add([
             'type' => 'checkbox',
             'name' => 'extended_site_description_linear',
             'options' => [
                 'label' => 'Linear', // @translate
+                'use_hidden_element' => true,
+                'checked_value' => '1',
+                'unchecked_value' => '0',
             ],
             'attributes' => [
                 'id' => 'extended_site_description_linear',
-                'value' => $siteSettings->get('extended_site_description_linear'),
+                'checked' => (bool) $siteSettings->get('extended_site_description_linear'),
             ],
         ]);
-        $fieldset->add([
-            'type' => 'select',
+        
+        $form->add([
+            'type' => \Laminas\Form\Element\Select::class,
             'name' => 'extended_site_description_categories',
             'options' => [
                 'label' => 'Categories', // @translate
@@ -107,12 +134,15 @@ class Module extends AbstractModule
             ],
             'attributes' => [
                 'id' => 'extended_site_description_categories',
-                'value' => $siteSettings->get('extended_site_description_categories'),
-                'class' => 'chosen-select',
                 'multiple' => true,
-                'data-placeholder' => 'Select categories', // @translate
+                'class' => 'chosen-select',
+                'data-placeholder' => 'Select categories',
             ],
         ]);
+        
+        $form->get('extended_site_description_categories')->setValue(
+            $siteSettings->get('extended_site_description_categories', [])
+        );       
     }
 
     public function addSettingsToApi(Event $event)
@@ -131,6 +161,9 @@ class Module extends AbstractModule
 
         $image = null;
         $imageId = $siteSettings->get('extended_site_description_image');
+
+        error_log(print_r($siteSettings->get('extended_site_description_categories'), true));
+
         if ($imageId) {
             try {
                 $response = $api->read('assets', $imageId);
@@ -141,4 +174,3 @@ class Module extends AbstractModule
         $event->setParam('jsonLd', $jsonLd);
     }
 }
-
