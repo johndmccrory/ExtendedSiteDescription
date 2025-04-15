@@ -1,7 +1,6 @@
 <?php
 namespace ExtendedSiteDescription;
 
-use Omeka\Form\Element\Asset;
 use Omeka\Module\AbstractModule;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\SharedEventManagerInterface;
