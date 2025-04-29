@@ -10,9 +10,9 @@ This module creates 2 additional inputs in the Settings page for every Site:
 In a public view, these values are accessibile using the siteSetting helper:
 
 ```php
-$linear = $this->siteSetting('extended_site_description_featured');
+$featured = $this->siteSetting('extended_site_description_featured');
 
-$linear = $this->siteSetting('extended_site_description_categories');
+$categories = $this->siteSetting('extended_site_description_categories');
 
 ```
 
