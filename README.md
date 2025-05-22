@@ -18,3 +18,5 @@ $categories = $this->siteSetting('extended_site_description_categories');
 
 The values are also exposed, using the same keys, in the site API output.
 
+Update: v0.4
+Revised to incorporate a rule only permitting letters (A-Z, a-z), optionally keeping spaces if desired.  
