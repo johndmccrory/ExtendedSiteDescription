@@ -81,8 +81,33 @@ $inputFilter->add([
 
     public function handleConfigForm(AbstractController $controller)
     {
+		#here <<<<<<<<<<<<<<<<<<<<<<
+		
+		
+		
         $rawCategories = $controller->params()->fromPost('extended_site_description_categories', '');
         $categories = array_unique(array_filter(array_map('trim', explode("\n", $rawCategories)), 'strlen'));
+		
+		
+		// Clean categories: Remove non-alphabetical characters
+    $cleanCategories = [];
+    foreach ($categories as $category) {
+        // Keep only letters (A-Z, a-z), optionally keep spaces if desired
+        $cleanCategory = preg_replace('/[^a-zA-Z ]/', '', $category);
+        if (!empty($cleanCategory)) {
+			
+			$cleanCategory = mb_substr($cleanCategory, 0, 50);
+            $cleanCategories[] = $cleanCategory;
+        }
+    }
+		
+		
+		 // Limit to 50 characters
+        
+		
+		
+		$categories = $cleanCategories;
+		
         $settings = $this->getServiceLocator()->get('Omeka\Settings');
         $settings->set('extended_site_description_categories', $categories);
     }
