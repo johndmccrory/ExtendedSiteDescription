@@ -1,14 +1,13 @@
 <?php
 namespace ExtendedSiteDescription;
 
-use Omeka\Form\Element\Asset;
 use Omeka\Module\AbstractModule;
-use Zend\EventManager\Event;
-use Zend\EventManager\SharedEventManagerInterface;
-use Zend\Form\Form;
-use Zend\Mvc\Controller\AbstractController;
-use Zend\ServiceManager\ServiceLocatorInterface;
-use Zend\View\Renderer\PhpRenderer;
+use Laminas\EventManager\Event;
+use Laminas\EventManager\SharedEventManagerInterface;
+use Laminas\Form\Form;
+use Laminas\Mvc\Controller\AbstractController;
+use Laminas\ServiceManager\ServiceLocatorInterface;
+use Laminas\View\Renderer\PhpRenderer;
 
 class Module extends AbstractModule
 
@@ -53,14 +52,10 @@ $inputFilter->add([
 ]);
 
 $inputFilter->add([
-    'name' => 'extended_site_description_linear',
+    'name' => 'extended_site_description_featured',
     'required' => false,
 ]);
 
-$inputFilter->add([
-    'name' => 'extended_site_description_image',
-    'required' => false,
-]);
 }
 
     public function getConfigForm(PhpRenderer $renderer)
@@ -86,8 +81,33 @@ $inputFilter->add([
 
     public function handleConfigForm(AbstractController $controller)
     {
+		#here <<<<<<<<<<<<<<<<<<<<<<
+		
+		
+		
         $rawCategories = $controller->params()->fromPost('extended_site_description_categories', '');
         $categories = array_unique(array_filter(array_map('trim', explode("\n", $rawCategories)), 'strlen'));
+		
+		
+		// Clean categories: Remove non-alphabetical characters
+    $cleanCategories = [];
+    foreach ($categories as $category) {
+        // Keep only letters (A-Z, a-z), optionally keep spaces if desired
+        $cleanCategory = preg_replace('/[^a-zA-Z ]/', '', $category);
+        if (!empty($cleanCategory)) {
+			
+			$cleanCategory = mb_substr($cleanCategory, 0, 50);
+            $cleanCategories[] = $cleanCategory;
+        }
+    }
+		
+		
+		 // Limit to 50 characters
+        
+		
+		
+		$categories = $cleanCategories;
+		
         $settings = $this->getServiceLocator()->get('Omeka\Settings');
         $settings->set('extended_site_description_categories', $categories);
     }
@@ -98,30 +118,19 @@ $inputFilter->add([
         $siteSettings = $form->getSiteSettings();
         $settings = $this->getServiceLocator()->get('Omeka\Settings');
         $categories = $settings->get('extended_site_description_categories', []);
-        $form->add([
-            'type' => \Omeka\Form\Element\Asset::class,
-            'name' => 'extended_site_description_image',
-            'options' => [
-                'label' => 'Image', // @translate
-            ],
-            'attributes' => [
-                'id' => 'extended_site_description_image',
-                'value' => $siteSettings->get('extended_site_description_image'),
-            ],
-        ]);
         
         $form->add([
             'type' => 'checkbox',
-            'name' => 'extended_site_description_linear',
+            'name' => 'extended_site_description_featured',
             'options' => [
-                'label' => 'Linear', // @translate
+                'label' => 'Featured', // @translate
                 'use_hidden_element' => true,
                 'checked_value' => '1',
                 'unchecked_value' => '0',
             ],
             'attributes' => [
-                'id' => 'extended_site_description_linear',
-                'checked' => (bool) $siteSettings->get('extended_site_description_linear'),
+                'id' => 'extended_site_description_featured',
+                'checked' => (bool) $siteSettings->get('extended_site_description_featured'),
             ],
         ]);
         
@@ -156,21 +165,7 @@ $inputFilter->add([
         $siteSettings->setTargetId($siteId);
 
         $jsonLd = $event->getParam('jsonLd');
-        $jsonLd['extended_site_description_linear'] = (bool) $siteSettings->get('extended_site_description_linear');
+        $jsonLd['extended_site_description_featured'] = (bool) $siteSettings->get('extended_site_description_featured');
         $jsonLd['extended_site_description_categories'] = $siteSettings->get('extended_site_description_categories', []);
-
-        $image = null;
-        $imageId = $siteSettings->get('extended_site_description_image');
-
-        error_log(print_r($siteSettings->get('extended_site_description_categories'), true));
-
-        if ($imageId) {
-            try {
-                $response = $api->read('assets', $imageId);
-                $image = $response->getContent();
-            } catch (\Omeka\Api\Exception\NotFoundException $e) {}
-        }
-        $jsonLd['extended_site_description_image'] = $image;
-        $event->setParam('jsonLd', $jsonLd);
     }
 }

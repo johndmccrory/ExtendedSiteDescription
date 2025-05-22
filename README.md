@@ -1,29 +1,22 @@
 # Extended Site Description
 ## A module for Omeka S
 
-This module currently creates 3 additional inputs in the Settings page for every Site:
+This module creates 2 additional inputs in the Settings page for every Site:
 
-- Image: an "asset" uploader/picker for attaching an image to a site
-- Linear: a true/false value controlled by a checkbox
+- Featured: a true/false value controlled by a checkbox
 - Categories: a multi-select of categories the site belongs to. Categories to choose from
   are configured in the module's Configure page.
 
 In a public view, these values are accessibile using the siteSetting helper:
 
 ```php
-$linear = $this->siteSetting('extended_site_description_linear');
+$featured = $this->siteSetting('extended_site_description_featured');
 
-$linear = $this->siteSetting('extended_site_description_categories');
+$categories = $this->siteSetting('extended_site_description_categories');
 
-$imageUrl = '';
-$imageId = $this->siteSetting('extended_site_description_image');
-if ($imageId) {
-    try {
-        $response = $this->api()->read('assets', $imageId);
-        $imageUrl = $response->getContent()->assetUrl();
-    } catch (\Omeka\Api\Exception\NotFoundException $e) {}
-}
 ```
 
 The values are also exposed, using the same keys, in the site API output.
 
+Update: v0.4
+Revised to incorporate a rule only permitting letters (A-Z, a-z), optionally keeping spaces if desired.  
