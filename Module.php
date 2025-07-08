@@ -1,4 +1,5 @@
 <?php
+
 namespace ExtendedSiteDescription;
 
 use Omeka\Module\AbstractModule;
@@ -10,7 +11,6 @@ use Laminas\ServiceManager\ServiceLocatorInterface;
 use Laminas\View\Renderer\PhpRenderer;
 
 class Module extends AbstractModule
-
 {
     public function uninstall(ServiceLocatorInterface $serviceLocator)
     {
@@ -39,30 +39,30 @@ class Module extends AbstractModule
     }
 
     public function filterSiteSettingsForm(Event $event)
-{
-    $inputFilter = $event->getParam('inputFilter');
+    {
+        $inputFilter = $event->getParam('inputFilter');
 
-$inputFilter->add([
-    'name' => 'extended_site_description_categories',
-    'required' => false,
-    'filters' => [
-        ['name' => \Laminas\Filter\StripTags::class],
-        ['name' => \Laminas\Filter\StringTrim::class],
-    ],
-]);
+        $inputFilter->add([
+            'name' => 'extended_site_description_categories',
+            'required' => false,
+            'filters' => [
+                ['name' => \Laminas\Filter\StripTags::class],
+                ['name' => \Laminas\Filter\StringTrim::class],
+            ],
+        ]);
 
-$inputFilter->add([
-    'name' => 'extended_site_description_featured',
-    'required' => false,
-]);
+        $inputFilter->add([
+            'name' => 'extended_site_description_featured',
+            'required' => false,
+        ]);
 
-}
+    }
 
     public function getConfigForm(PhpRenderer $renderer)
     {
         $settings = $this->getServiceLocator()->get('Omeka\Settings');
         $categories = implode("\n", $settings->get('extended_site_description_categories', []));
-        $form = new Form;
+        $form = new Form();
         $form->add([
             'type' => 'textarea',
             'name' => 'extended_site_description_categories',
@@ -81,33 +81,33 @@ $inputFilter->add([
 
     public function handleConfigForm(AbstractController $controller)
     {
-		#here <<<<<<<<<<<<<<<<<<<<<<
-		
-		
-		
+        #here <<<<<<<<<<<<<<<<<<<<<<
+
+
+
         $rawCategories = $controller->params()->fromPost('extended_site_description_categories', '');
         $categories = array_unique(array_filter(array_map('trim', explode("\n", $rawCategories)), 'strlen'));
-		
-		
-		// Clean categories: Remove non-alphabetical characters
-    $cleanCategories = [];
-    foreach ($categories as $category) {
-        // Keep only letters (A-Z, a-z), optionally keep spaces if desired
-        $cleanCategory = preg_replace('/[^a-zA-Z ]/', '', $category);
-        if (!empty($cleanCategory)) {
-			
-			$cleanCategory = mb_substr($cleanCategory, 0, 50);
-            $cleanCategories[] = $cleanCategory;
+
+
+        // Clean categories: Remove non-alphabetical characters
+        $cleanCategories = [];
+        foreach ($categories as $category) {
+            // Keep only letters (A-Z, a-z), optionally keep spaces if desired
+            $cleanCategory = preg_replace('/[^a-zA-Z ]/', '', $category);
+            if (!empty($cleanCategory)) {
+
+                $cleanCategory = mb_substr($cleanCategory, 0, 50);
+                $cleanCategories[] = $cleanCategory;
+            }
         }
-    }
-		
-		
-		 // Limit to 50 characters
-        
-		
-		
-		$categories = $cleanCategories;
-		
+
+
+        // Limit to 50 characters
+
+
+
+        $categories = $cleanCategories;
+
         $settings = $this->getServiceLocator()->get('Omeka\Settings');
         $settings->set('extended_site_description_categories', $categories);
     }
@@ -118,7 +118,7 @@ $inputFilter->add([
         $siteSettings = $form->getSiteSettings();
         $settings = $this->getServiceLocator()->get('Omeka\Settings');
         $categories = $settings->get('extended_site_description_categories', []);
-        
+
         $form->add([
             'type' => 'checkbox',
             'name' => 'extended_site_description_featured',
@@ -133,7 +133,7 @@ $inputFilter->add([
                 'checked' => (bool) $siteSettings->get('extended_site_description_featured'),
             ],
         ]);
-        
+
         $form->add([
             'type' => \Laminas\Form\Element\Select::class,
             'name' => 'extended_site_description_categories',
@@ -148,10 +148,10 @@ $inputFilter->add([
                 'data-placeholder' => 'Select categories',
             ],
         ]);
-        
+
         $form->get('extended_site_description_categories')->setValue(
             $siteSettings->get('extended_site_description_categories', [])
-        );       
+        );
     }
 
     public function addSettingsToApi(Event $event)
