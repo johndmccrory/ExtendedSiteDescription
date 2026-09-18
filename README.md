@@ -1,5 +1,5 @@
 # Extended Site Description
-## A module for Omeka S
+## A module for Omeka S updated using AI assistance from ChatGPT
 
 This module currently creates 3 additional inputs in the Settings page for every Site:
 
